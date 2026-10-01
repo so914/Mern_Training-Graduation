@@ -1,0 +1,53 @@
+services:
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8090:8080"
+    networks:
+      - mern-network
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    networks:
+      - mern-network
+    depends_on:
+      - mongodb
+    environment:
+      MONGODB_URL: mongodb://root:example@mongodb:27017/mern_training?authSource=admin
+
+  mongodb:
+    image: mongo:7
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - mern-network
+
+  mongo-express:
+    image: mongo-express:latest
+    restart: always
+    ports:
+      - "8091:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongodb:27017/?authSource=admin
+      ME_CONFIG_BASICAUTH_ENABLED: "true"
+      ME_CONFIG_BASICAUTH_USERNAME: mongoexpressuser
+      ME_CONFIG_BASICAUTH_PASSWORD: mongoexpresspass
+    depends_on:
+      - mongodb
+    networks:
+      - mern-network
+
+volumes:
+  mongo_data:
+
+networks:
+  mern-network:
